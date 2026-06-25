@@ -3,15 +3,16 @@
 import { motion } from "framer-motion"
 
 export default function ScreenContainer({ children, className = "" }) {
-    return (
-        <motion.div
-            className={`min-h-screen flex flex-col items-center justify-center p-4 relative ${className}`}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
-        >
-            {children}
-        </motion.div>
-    )
+  return (
+    <motion.div
+      className={className}
+      style={{ minHeight: "100vh", width: "100%", position: "relative" }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.5, ease: "easeOut" }}
+    >
+      {children}
+    </motion.div>
+  )
 }

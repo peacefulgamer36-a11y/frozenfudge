@@ -3,120 +3,270 @@
 import { useState, useEffect, useRef } from "react";
 
 import ScreenContainer from "../ScreenContainer";
-
 import NFHeader from "@/components/shared/NFHeader";
 import NFRow from "@/components/shared/NFRow";
 import NFDetailModal from "@/components/shared/NFDetailModal";
+import NFFullscreenPlayer from "@/components/shared/NFFullscreenPlayer";
 
-import { AnimatePresence } from "framer-motion";
+import { HERO, ROWS } from "@/DATA";
 
-const SECTIONS_DATA = [
-  {
-    id: "row-popular",
-    rowTitle: "Popular on Netflix",
-    items: [
-      { id: "p1", title: "Our Memories", tags: ["Romantic", "Nostalgic"], match: "98% Match", age: "13+", duration: "1h 45m", img: "/images/1.png", desc: "When a beautiful journey of shared smiles and unforgettable milestones unfolds, two hearts create a timeless masterpiece of memories. Revisit the chapters that defined love." },
-      { id: "p2", title: "Favorite Moments", tags: ["Heartfelt", "Deep Connections"], match: "95% Match", age: "16+", duration: "2h 10m", img: "/images/2.png", desc: "A curated collection of absolute candid gold. From silent glances to endless laughter, explore the definitive guide to why every second spent together is a blockbuster hit." },
-      { id: "p3", title: "Late Night Chats", tags: ["Witty", "Charming"], match: "99% Match", age: "All", duration: "45m", img: "/images/3.png", desc: "Screens glow under blankets as midnight rules disappear. Dive into the witty banter, spontaneous confessions, and sleepy moments that kept the moon awake." },
-      { id: "p4", title: "The Beginning", tags: ["Slow Burn", "Rom-Com"], match: "92% Match", age: "13+", duration: "1 Season", img: "/images/4.png", desc: "Step back to day one. The nervous text messages, the accidental eye contact, and the beautiful spark that ignited an unexpected but magnificent story of togetherness." },
-      { id: "p5", title: "Cute Fights", tags: ["Drama", "Playful"], match: "89% Match", age: "18+", duration: "2 Seasons", img: "/images/5.png", desc: "Overdramatic pouting, fake angry faces, and the legendary debates about who loves whom more. Witness the chaotic, funny, and utterly adorable friction of true companionship." },
-    ]
-  },
-  {
-    id: "row-trending",
-    rowTitle: "Trending Now",
-    items: [
-      { id: "t1", title: "Special Days", tags: ["Celebration", "Feel-good"], match: "97% Match", age: "All", duration: "1h 15m", img: "/images/1.png", desc: "Every anniversary, birthday, and random surprise date packed into a high-energy saga of joy. A beautiful reminder that everyday moments become historic milestones together." },
-      { id: "t2", title: "Long Calls", tags: ["Calm", "Intimate"], match: "94% Match", age: "13+", duration: "3h 05m", img: "/images/3.png", desc: "Miles melt away through copper wires and digital screens. An emotional look into how voices across distances build an unshakeable bridge of unconditional warmth and security." },
-      { id: "t3", title: "First Impression", tags: ["Awkward", "Adorable"], match: "91% Match", age: "13+", duration: "25m", img: "/images/2.png", desc: "The untold behind-the-scenes thoughts from the very first meeting. Unfiltered, slightly clumsy, completely endearing reflections of two souls meeting their favorite destiny." },
-      { id: "t4", title: "Inside Jokes", tags: ["Hilarious", "Eccentric"], match: "96% Match", age: "All", duration: "5 Seasons", img: "/images/4.png", desc: "A secret language built over shared glances across crowded rooms. Warning: High doses of humor that absolutely no one else in the world will ever understand." },
-      { id: "t5", title: "Infinite Love", tags: ["Timeless", "Masterpiece"], match: "99% Match", age: "All", duration: "Forever", img: "/images/5.png", desc: "The grand finale that never ends. A deep, cinematic exploration of commitment, shared dreams, and a bond configured to outlast the stars themselves." },
-    ]
-  }
-];
-
-export default function Netflix({ onNext }) { 
-  const [isScrolled, setIsScrolled] = useState(false);
+export default function Netflix({ onNext }) {
   const [selectedMedia, setSelectedMedia] = useState(null);
+  const [heroFullscreen, setHeroFullscreen] = useState(false);
   const containerRef = useRef(null);
 
-
-  useEffect(() => {
-    const handleScroll = () => {
-      if (containerRef.current && containerRef.current.scrollTop > 30) {
-        setIsScrolled(true);
-      } else {
-        setIsScrolled(false);
-      }
-    };
-    const container = containerRef.current;
-    if (container) container.addEventListener("scroll", handleScroll);
-    return () => container?.removeEventListener("scroll", handleScroll);
-  }, []);
+  const titleLines = HERO.title.split("\n");
 
   return (
     <ScreenContainer>
       <div
         ref={containerRef}
-        className="relative w-full h-screen bg-[#000000] text-white overflow-y-auto overflow-x-hidden font-sans antialiased select-none scrollbar-none"
+        style={{
+          position: "relative",
+          width: "100%",
+          height: "100vh",
+          background: "#000",
+          color: "#fff",
+          overflowY: "auto",
+          overflowX: "hidden",
+          fontFamily: "'Netflix Sans', 'Helvetica Neue', Arial, sans-serif",
+          scrollbarWidth: "none",
+          msOverflowStyle: "none",
+        }}
       >
-        {/* Netflix Header */}
-        <NFHeader isScrolled={isScrolled} />
+        {/* ── Header ── always transparent */}
+        <NFHeader />
 
-        {/* Hero */}
-        <div className="relative z-10 w-full h-[56vw] min-h-[340px] sm:min-h-[440px] md:min-h-[500px] lg:h-[80vh] flex items-center px-4 sm:px-8 md:px-12 lg:px-16 pt-16 sm:pt-20">
-          <div className="absolute inset-0 z-0 bg-black">
+        {/* ─────────────────────────────────────────
+            HERO SECTION
+        ───────────────────────────────────────── */}
+        <div style={{
+          position: "relative",
+          width: "100%",
+          height: "clamp(56vw, 80vh, 90vh)",
+          minHeight: 280,
+          display: "flex",
+          alignItems: "flex-end",
+          paddingBottom: "clamp(16px, 5vw, 60px)",
+          paddingLeft: "clamp(16px, 5vw, 60px)",
+          paddingRight: "clamp(16px, 5vw, 60px)",
+          paddingTop: 60,
+        }}>
+
+          {/* ── Background — responsive image ── */}
+          <div style={{ position: "absolute", inset: 0, background: "#000" }}>
+            {/* Mobile image (< 768px) */}
+            {HERO.backgroundMobileSrc && (
+              <img
+                src={HERO.backgroundMobileSrc}
+                alt="Hero Mobile"
+                className="hero-bg-mobile"
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  objectPosition: "center top",
+                  filter: "brightness(0.55) contrast(1.02)",
+                  display: "none",
+                }}
+              />
+            )}
+            {/* Desktop/tablet image (>= 768px) */}
             <img
-              src="/gifs/intro.gif"
-              alt="Billboard Background"
-              className="w-full h-full object-cover brightness-[0.55] contrast-[1.02] object-center"
+              src={HERO.backgroundSrc}
+              alt="Hero Desktop"
+              className="hero-bg-desktop"
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+                objectPosition: "center top",
+                filter: "brightness(0.55) contrast(1.02)",
+              }}
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/20 to-transparent w-full md:w-[55%]" />
-            <div className="absolute bottom-0 left-0 w-full h-[15%] bg-gradient-to-t from-[#141414] to-transparent" />
+
+            {/* Gradients */}
+            <div style={{
+              position: "absolute",
+              inset: 0,
+              background: "linear-gradient(to right, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.25) 45%, transparent 75%)",
+            }} />
+            <div style={{
+              position: "absolute",
+              bottom: 0,
+              left: 0,
+              right: 0,
+              height: "32%",
+              background: "linear-gradient(to top, #141414 0%, transparent 100%)",
+            }} />
+            <div style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              height: "20%",
+              background: "linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, transparent 100%)",
+            }} />
           </div>
 
-          <div className="relative z-10 w-full max-w-[90%] sm:max-w-md md:max-w-xl lg:max-w-2xl flex flex-col items-start gap-1.5 sm:gap-3">
-            <div className="flex items-center gap-1">
-              <span className="text-[#e50914] font-black text-xl sm:text-3xl tracking-tighter">N</span>
-              <span className="text-[9px] sm:text-[11px] font-bold tracking-[0.3em] uppercase text-gray-300 pt-1">Series</span>
+          {/* ── Hero Content ── */}
+          <div style={{
+            position: "relative",
+            zIndex: 10,
+            maxWidth: "clamp(260px, 55%, 580px)",
+            display: "flex",
+            flexDirection: "column",
+            gap: "clamp(6px, 1.5vw, 14px)",
+          }}>
+            {/* N Series badge */}
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <span style={{ color: "#e50914", fontWeight: 900, fontSize: "clamp(18px, 4vw, 32px)", lineHeight: 1 }}>N</span>
+              <span style={{ fontSize: "clamp(8px, 1.2vw, 11px)", fontWeight: 700, letterSpacing: "0.3em", textTransform: "uppercase", color: "#ccc", paddingTop: 2 }}>
+                {HERO.badgeLabel}
+              </span>
             </div>
 
-            <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black tracking-tight text-white uppercase leading-[0.95] drop-shadow-md">
-              Something <br /> Special
+            {/* Title */}
+            <h1 style={{
+              fontSize: "clamp(22px, 6.5vw, 72px)",
+              fontWeight: 900,
+              letterSpacing: "-0.02em",
+              color: "#fff",
+              textTransform: "uppercase",
+              lineHeight: 0.95,
+              textShadow: "0 2px 12px rgba(0,0,0,0.6)",
+              margin: 0,
+            }}>
+              {titleLines.map((line, i) => (
+                <span key={i} style={{ display: "block" }}>{line}</span>
+              ))}
             </h1>
 
-            <div className="flex items-center gap-2 text-[10px] sm:text-xs font-semibold">
-              <span className="text-green-400">99% Match</span>
-              <span className="border border-white/40 px-1 text-[8px] rounded-sm bg-black/30">2026</span>
-              <span className="text-gray-300">1 Season</span>
-              <span className="border border-red-600 px-1 text-[8px] text-red-500 font-extrabold rounded-sm">4K Ultra</span>
+            {/* Meta badges */}
+            <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "clamp(4px, 1vw, 8px)", fontSize: "clamp(9px, 1.5vw, 13px)", fontWeight: 600 }}>
+              <span style={{ color: "#46d369" }}>{HERO.match}</span>
+              <span style={{ border: "1px solid rgba(255,255,255,0.35)", padding: "0 4px", fontSize: "clamp(7px, 1vw, 10px)", borderRadius: 2, background: "rgba(0,0,0,0.3)" }}>
+                {HERO.year}
+              </span>
+              <span style={{ color: "#ccc" }}>{HERO.duration}</span>
+              <span style={{ border: "1px solid #e50914", padding: "0 5px", fontSize: "clamp(7px, 1vw, 10px)", color: "#e50914", fontWeight: 800, borderRadius: 2 }}>
+                {HERO.quality}
+              </span>
             </div>
 
-            <p className="text-[11px] sm:text-xs md:text-sm lg:text-base text-gray-200 font-normal leading-snug sm:leading-relaxed max-w-xs sm:max-w-sm md:max-w-lg text-left line-clamp-3 sm:line-clamp-none">
-              There’s something truly wonderful I've been waiting to tell you... that's exactly why I crafted this little universe just for you. Are you ready to discover the full story?
+            {/* Description */}
+            <p style={{
+              fontSize: "clamp(11px, 1.8vw, 16px)",
+              color: "rgba(230,230,230,0.92)",
+              fontWeight: 400,
+              lineHeight: 1.55,
+              margin: 0,
+            }}>
+              {HERO.description}
             </p>
 
-            <div className="flex items-center gap-2 sm:gap-3 mt-1 sm:mt-2">
-              <button onClick={onNext} className="flex items-center justify-center gap-1.5 bg-white text-black font-bold px-4 sm:px-6 py-1.5 sm:py-2 rounded hover:bg-white/80 transition-all text-xs sm:text-sm shadow-md active:scale-95 whitespace-nowrap">
-                ▶ Play
-              </button>
+            {/* Buttons */}
+            <div style={{ display: "flex", alignItems: "center", gap: "clamp(8px, 2vw, 16px)", marginTop: 4 }}>
+
+              {/* ✅ Play → opens FULLSCREEN player */}
               <button
-                onClick={() => setSelectedMedia(SECTIONS_DATA[0].items[0])}
-                className="flex items-center justify-center gap-1.5 bg-[#6d6d6e]/60 text-white font-bold px-3 sm:px-5 py-1.5 sm:py-2 rounded hover:bg-[#6d6d6e]/40 transition-all text-xs sm:text-sm backdrop-blur-md active:scale-95 whitespace-nowrap"
+                onClick={() => setHeroFullscreen(true)}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 7,
+                  background: "#fff",
+                  color: "#000",
+                  fontWeight: 700,
+                  fontSize: "clamp(11px, 1.8vw, 16px)",
+                  padding: "clamp(7px, 1.5vw, 13px) clamp(14px, 3vw, 28px)",
+                  borderRadius: 4,
+                  border: "none",
+                  cursor: "pointer",
+                  whiteSpace: "nowrap",
+                  boxShadow: "0 2px 10px rgba(0,0,0,0.5)",
+                  transition: "background 0.18s, transform 0.1s",
+                }}
+                onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.82)"}
+                onMouseLeave={e => e.currentTarget.style.background = "#fff"}
+                onMouseDown={e => e.currentTarget.style.transform = "scale(0.96)"}
+                onMouseUp={e => e.currentTarget.style.transform = "scale(1)"}
               >
-                ⓘ More Info
+                <svg viewBox="0 0 24 24" fill="black" style={{ width: "clamp(14px, 2vw, 18px)", height: "clamp(14px, 2vw, 18px)" }}>
+                  <path d="M8 5v14l11-7z"/>
+                </svg>
+                Play
+              </button>
+
+              {/* More Info → opens detail modal of first item */}
+              <button
+                onClick={() => setSelectedMedia(ROWS[0].items[0])}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 7,
+                  background: "rgba(109,109,110,0.6)",
+                  color: "#fff",
+                  fontWeight: 700,
+                  fontSize: "clamp(11px, 1.8vw, 16px)",
+                  padding: "clamp(7px, 1.5vw, 13px) clamp(12px, 2.5vw, 24px)",
+                  borderRadius: 4,
+                  border: "none",
+                  cursor: "pointer",
+                  backdropFilter: "blur(6px)",
+                  whiteSpace: "nowrap",
+                  transition: "background 0.18s, transform 0.1s",
+                }}
+                onMouseEnter={e => e.currentTarget.style.background = "rgba(109,109,110,0.38)"}
+                onMouseLeave={e => e.currentTarget.style.background = "rgba(109,109,110,0.6)"}
+                onMouseDown={e => e.currentTarget.style.transform = "scale(0.96)"}
+                onMouseUp={e => e.currentTarget.style.transform = "scale(1)"}
+              >
+                <svg viewBox="0 0 24 24" fill="white" style={{ width: "clamp(14px, 2vw, 18px)", height: "clamp(14px, 2vw, 18px)" }}>
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                </svg>
+                More Info
               </button>
             </div>
           </div>
 
-          <div className="absolute right-0 bottom-[18%] z-20 flex items-center bg-black/30 border-l-4 border-gray-400 py-0.5 px-3 text-[10px] sm:text-xs font-normal">
-            13+
+          {/* Age rating badge */}
+          <div style={{
+            position: "absolute",
+            right: 0,
+            bottom: "clamp(20px, 4vw, 45px)",
+            zIndex: 20,
+            display: "flex",
+            alignItems: "center",
+            background: "rgba(0,0,0,0.35)",
+            borderLeft: "3px solid rgba(255,255,255,0.6)",
+            padding: "4px 12px 4px 10px",
+            fontSize: "clamp(9px, 1.5vw, 13px)",
+            fontWeight: 500,
+            color: "#ddd",
+            letterSpacing: 1,
+          }}>
+            {HERO.ageRating}
           </div>
         </div>
 
-        {/* Rows */}
-        <div className="relative z-20 pb-24 px-4 sm:px-8 md:px-12 lg:px-16 -mt-4 sm:-mt-8 lg:-mt-16 flex flex-col gap-6 sm:gap-10">
-          {SECTIONS_DATA.map((section) => (
+        {/* ─────────────────────────────────────────
+            ROWS SECTION
+        ───────────────────────────────────────── */}
+        <div style={{
+          position: "relative",
+          zIndex: 20,
+          paddingBottom: 80,
+          paddingLeft: "clamp(16px, 4vw, 60px)",
+          paddingRight: "clamp(16px, 4vw, 60px)",
+          marginTop: "clamp(-20px, -3vw, -60px)",
+          display: "flex",
+          flexDirection: "column",
+          gap: "clamp(20px, 4vw, 40px)",
+        }}>
+          {ROWS.map((section) => (
             <NFRow
               key={section.id}
               title={section.rowTitle}
@@ -126,35 +276,54 @@ export default function Netflix({ onNext }) {
           ))}
         </div>
 
-        {/* Modal */}
+        {/* Footer */}
+        <footer style={{
+          width: "100%",
+          maxWidth: 900,
+          margin: "0 auto",
+          padding: "24px clamp(16px, 4vw, 40px) 40px",
+          color: "#555",
+          fontSize: "clamp(10px, 1.5vw, 12px)",
+          borderTop: "1px solid rgba(255,255,255,0.04)",
+          textAlign: "center",
+        }}>
+          <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "8px 24px", marginBottom: 12 }}>
+            {["Help Center", "Terms of Use", "Privacy Policy", "Contact Us"].map(link => (
+              <span key={link} style={{ cursor: "pointer", textDecoration: "underline", color: "#666" }}>{link}</span>
+            ))}
+          </div>
+          <p style={{ color: "#444", fontSize: "clamp(9px, 1.2vw, 11px)", margin: 0 }}>
+            © 1997–2026 Netflix, Inc. Built with love and absolute layout precision.
+          </p>
+        </footer>
+
+        {/* ── Detail Modal for row cards ── */}
         <NFDetailModal
           media={selectedMedia}
           onClose={() => setSelectedMedia(null)}
-          onPlayNow={() => {
-            setSelectedMedia(null);
-            onNext();
-          }}
         />
 
+        {/* ── Hero Fullscreen Player ── */}
+        <NFFullscreenPlayer
+          videoSrc={HERO.videoSrc}
+          thumbnailSrc={HERO.videoThumbnail || HERO.backgroundSrc}
+          isOpen={heroFullscreen}
+          onClose={() => setHeroFullscreen(false)}
+        />
 
-        {/* ==================== 5. COMPACT CLEAN FOOTER ==================== */}
-        <footer className="w-full max-w-4xl mx-auto px-4 pb-8 text-gray-500 text-[11px] flex flex-col gap-4 mt-6 border-t border-white/5 pt-6 text-center sm:text-left">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-            <span className="hover:underline cursor-pointer">Help Center</span>
-            <span className="hover:underline cursor-pointer">Terms of Use</span>
-            <span className="hover:underline cursor-pointer">Privacy Policy</span>
-            <span className="hover:underline cursor-pointer">Contact Us</span>
-          </div>
-          <p className="text-[10px] text-gray-600 mt-2">© 1997-2026 Netflix, Inc. Built with love and absolute layout precision.</p>
-        </footer>
-
+        <style jsx global>{`
+          /* Mobile: show mainph.png, hide main.png */
+          @media (max-width: 767px) {
+            .hero-bg-mobile { display: block !important; }
+            .hero-bg-desktop { display: none !important; }
+          }
+          /* Desktop: show main.png, hide mainph.png */
+          @media (min-width: 768px) {
+            .hero-bg-mobile { display: none !important; }
+            .hero-bg-desktop { display: block !important; }
+          }
+        `}</style>
       </div>
-
-      <style jsx global>{`
-        .scrollbar-none::-webkit-scrollbar {
-          display: none !important;
-        }
-      `}</style>
     </ScreenContainer>
   );
 }

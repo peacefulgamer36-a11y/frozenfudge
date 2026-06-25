@@ -1,31 +1,87 @@
 "use client";
 
+/**
+ * NFRow — thumbnail grid.
+ * Card par click → onSelect (detail modal open)
+ * Row mein koi video inline nahi chalta — sirf thumbnail dikhta hai
+ */
 export default function NFRow({ title, items = [], onSelect }) {
   return (
-    <div className="w-full">
-      <h2 className="text-xs sm:text-sm md:text-base lg:text-lg font-bold text-gray-200 mb-2 tracking-wide">
+    <div style={{ width: "100%" }}>
+      <h2 style={{
+        fontSize: "clamp(13px, 2vw, 18px)",
+        fontWeight: 700,
+        color: "#e5e5e5",
+        marginBottom: 10,
+        letterSpacing: "0.02em",
+      }}>
         {title}
       </h2>
 
       <div
-        className="nf-row-scroll flex gap-2 overflow-x-auto pb-2 snap-x snap-mandatory"
-        style={{ WebkitOverflowScrolling: "touch" }}
+        className="nf-row-scroll"
+        style={{
+          display: "flex",
+          gap: 6,
+          overflowX: "auto",
+          paddingBottom: 8,
+          scrollSnapType: "x mandatory",
+          WebkitOverflowScrolling: "touch",
+        }}
       >
         {items.map((item) => (
           <div
             key={item.id}
             onClick={() => onSelect?.(item)}
-            className="nf-card snap-start relative w-[46vw] sm:w-[33vw] md:w-[22vw] lg:w-[17vw] max-w-[240px] aspect-video rounded-sm bg-[#181818] overflow-hidden cursor-pointer border border-white/5 shadow-md flex-shrink-0 group transition-transform duration-200"
+            className="nf-card"
+            style={{
+              position: "relative",
+              flexShrink: 0,
+              width: "clamp(140px, 44vw, 240px)",
+              aspectRatio: "16/9",
+              borderRadius: 4,
+              background: "#181818",
+              overflow: "hidden",
+              cursor: "pointer",
+              border: "1px solid rgba(255,255,255,0.06)",
+              scrollSnapAlign: "start",
+            }}
           >
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent z-10 opacity-80" />
+            {/* Static Thumbnail only — no inline video */}
             <img
               src={item.img}
               alt={item.title}
-              className="w-full h-full object-cover"
-              loading="lazy"
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+                display: "block",
+                transition: "transform 0.3s",
+              }}
               draggable={false}
             />
-            <div className="absolute bottom-1.5 left-2 z-20 text-[10px] sm:text-xs font-medium truncate max-w-[90%] text-gray-200">
+
+            {/* Dark gradient overlay */}
+            <div style={{
+              position: "absolute",
+              inset: 0,
+              background: "linear-gradient(to top, rgba(0,0,0,0.82) 0%, transparent 55%)",
+              pointerEvents: "none",
+            }} />
+
+            {/* Title */}
+            <div style={{
+              position: "absolute",
+              bottom: 6,
+              left: 8,
+              right: 8,
+              fontSize: "clamp(9px, 1.8vw, 12px)",
+              fontWeight: 500,
+              color: "#e5e5e5",
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            }}>
               {item.title}
             </div>
           </div>
@@ -33,23 +89,21 @@ export default function NFRow({ title, items = [], onSelect }) {
       </div>
 
       <style jsx global>{`
-        .nf-row-scroll::-webkit-scrollbar {
-          display: none !important;
+        .nf-row-scroll::-webkit-scrollbar { display: none !important; }
+        .nf-row-scroll { scrollbar-width: none; -ms-overflow-style: none; }
+
+        @media (min-width: 640px) {
+          .nf-card { width: clamp(160px, 32vw, 240px) !important; }
         }
-        .nf-row-scroll {
-          scrollbar-width: none;
-          -ms-overflow-style: none;
+        @media (min-width: 1024px) {
+          .nf-card { width: clamp(160px, 18vw, 240px) !important; }
         }
-        .nf-card {
-          transform: translateZ(0);
-        }
+
         @media (hover: hover) {
-          .nf-card:hover {
-            transform: scale(1.06);
-          }
+          .nf-card:hover { transform: scale(1.05); transition: transform 0.2s ease; z-index: 10; }
+          .nf-card:hover img { transform: scale(1.04); }
         }
       `}</style>
     </div>
   );
 }
-
